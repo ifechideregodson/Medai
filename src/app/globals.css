@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+:root { color-scheme: light; }
+body { margin: 0; background: #f5f7fb; color: #172033; font-family: Arial, Helvetica, sans-serif; }
+.card { background: white; border: 1px solid #e5e9f2; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(20,30,50,.04); }
+.btn { border-radius: 10px; padding: 10px 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
