@@ -124,7 +124,7 @@ export async function getPrivateObject(key: string, metadata?: string | null) {
   }
 }
 
-async function bodyToBytes(body: NonNullable<Awaited<ReturnType<typeof getPrivateObject>>["Body"]>) {
+export async function bodyToBytes(body: NonNullable<Awaited<ReturnType<typeof getPrivateObject>>["Body"]>) {
   return body instanceof Uint8Array ? body : await body.transformToByteArray();
 }
 
