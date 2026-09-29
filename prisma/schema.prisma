@@ -81,6 +81,7 @@ model Consent {
   updatedAt DateTime @updatedAt
   patient Patient @relation(fields:[patientId],references:[id],onDelete:Cascade)
   organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  recordedBy User? @relation("ConsentRecorder", fields:[recordedById], references:[id], onDelete:SetNull)
 }
 
 model ClinicalReport {
@@ -172,7 +173,7 @@ model User {
   annotations AnalysisAnnotation[]
   auditLogs     AuditLog[]
   analyses      Analysis[]
-  consents      Consent[]
+  consents      Consent[] @relation("ConsentRecorder")
   sessions      Session[]
   systemSettings SystemSetting[]
 }
@@ -204,6 +205,8 @@ model Patient {
   assets        Asset[]
   imagingStudies ImagingStudy[]
   analyses      Analysis[]
+  consents      Consent[]
+  reports       ClinicalReport[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -294,6 +297,7 @@ model Analysis {
   reviewStatus    String         @default("PENDING")
   reviewDecision  String?
   report          ClinicalReport?
+  inferenceRuns   InferenceRun[]
   annotations     AnalysisAnnotation[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
