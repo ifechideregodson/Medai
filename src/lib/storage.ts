@@ -36,7 +36,7 @@ function cloudinaryResourceType(contentType: string) {
 }
 
 function cloudinaryPublicId(key: string) {
-  return `medai/${key.replace(/^\\/+/, "").replace(/\\.[^/.]+$/, "")}`;
+  return `medai/${key.replace(/^\/+/, "").replace(/\.[^/.]+$/, "")}`;
 }
 
 export type StorageLocation = {
