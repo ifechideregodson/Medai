@@ -55,6 +55,5 @@ function extractOutputText(payload: any): string | null {
       if (typeof content?.text === "string") chunks.push(content.text);
     }
   }
-  return chunks.join("
-") || null;
+  return chunks.join("\n") || null;
 }
