@@ -18,7 +18,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     headers.set("Content-Type", asset.mimeType || object.ContentType || "application/octet-stream");
     headers.set("Cache-Control", "private, no-store");
     if (object.ContentLength != null) headers.set("Content-Length", String(object.ContentLength));
-    return new NextResponse(await object.Body.transformToByteArray(), { status: 200, headers });
+    const bytes = object.Body instanceof Uint8Array
+      ? object.Body
+      : await object.Body.transformToByteArray();
+    return new NextResponse(bytes, { status: 200, headers });
   } catch (error) {
     const message = error instanceof Error ? error.message : "ASSET_READ_FAILED";
     return NextResponse.json({ error: message }, { status: message === "FORBIDDEN" ? 403 : 500 });
