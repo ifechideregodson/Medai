@@ -21,7 +21,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     const bytes = object.Body instanceof Uint8Array
       ? object.Body
       : await object.Body.transformToByteArray();
-    return new NextResponse(bytes, { status: 200, headers });
+    const body = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    return new NextResponse(body, { status: 200, headers });
   } catch (error) {
     const message = error instanceof Error ? error.message : "ASSET_READ_FAILED";
     return NextResponse.json({ error: message }, { status: message === "FORBIDDEN" ? 403 : 500 });
