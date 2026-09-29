@@ -12,7 +12,8 @@ export type DicomMetadata = {
 
 export async function extractDicomMetadata(bytes: Uint8Array): Promise<DicomMetadata> {
   const mod = await import("dcmjs");
-  const dataSet = mod.data.DicomMessage.readFile(bytes.buffer);
+  const dcmBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  const dataSet = mod.data.DicomMessage.readFile(dcmBuffer);
   const natural = mod.data.DicomMetaDictionary.namifyDataset(dataSet.dict);
   const number = (v: unknown) => v == null ? undefined : Number(Array.isArray(v) ? v[0] : v);
   const first = (v: unknown) => Array.isArray(v) ? v[0] : v;
