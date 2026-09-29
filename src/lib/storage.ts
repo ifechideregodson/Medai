@@ -40,6 +40,12 @@ function cloudinaryPublicId(key: string) {
   return `medai/${key.replace(/^\/+/, "").replace(/\.[^/.]+$/, "")}`;
 }
 
+type CloudinaryStorageLocation = {
+  provider: "cloudinary";
+  key: string;
+  cloudinary: { publicId: string; resourceType: "image" | "raw"; format?: string; assetId?: string };
+};
+
 export type StorageLocation = {
   provider: "s3" | "cloudinary";
   key: string;
@@ -95,19 +101,38 @@ export async function putPrivateObject(key: string, body: Uint8Array, contentTyp
   return { primary: s3 ?? cld!, locations: [s3, cld].filter(Boolean) as StorageLocation[], errors };
 }
 
-function parseCloudinaryLocation(metadata?: string | null): Extract<StorageLocation, { provider: "cloudinary" }> | null {
+function parseCloudinaryLocation(metadata?: string | null): CloudinaryStorageLocation | null {
   if (!metadata) return null;
   try {
-    const parsed = JSON.parse(metadata);
-    const c = parsed?.storage?.cloudinary;
-    if (!c?.publicId || !c?.resourceType) return null;
-    return { provider: "cloudinary", key: parsed.storage.key || "", cloudinary: c };
+    const parsed = JSON.parse(metadata) as {
+      storage?: {
+        key?: unknown;
+        cloudinary?: {
+          publicId?: unknown;
+          resourceType?: unknown;
+          format?: unknown;
+          assetId?: unknown;
+        };
+      };
+    };
+    const c = parsed.storage?.cloudinary;
+    if (typeof c?.publicId !== "string" || (c.resourceType !== "image" && c.resourceType !== "raw")) return null;
+    return {
+      provider: "cloudinary",
+      key: typeof parsed.storage?.key === "string" ? parsed.storage.key : "",
+      cloudinary: {
+        publicId: c.publicId,
+        resourceType: c.resourceType,
+        format: typeof c.format === "string" ? c.format : undefined,
+        assetId: typeof c.assetId === "string" ? c.assetId : undefined
+      }
+    };
   } catch { return null; }
 }
 
-async function getFromCloudinary(location: Extract<StorageLocation, { provider: "cloudinary" }>) {
+async function getFromCloudinary(location: CloudinaryStorageLocation) {
   const cld = configureCloudinary();
-  const c = location.cloudinary!;
+  const c = location.cloudinary;
   const format = c.format || "bin";
   const url = cld.utils.private_download_url(c.publicId, format, { resource_type: c.resourceType, type: "authenticated", expires_at: Math.floor(Date.now() / 1000) + 300 });
   const response = await fetch(url, { cache: "no-store" });
