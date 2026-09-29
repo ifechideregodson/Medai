@@ -137,7 +137,7 @@ export async function repairPrivateObject(key: string, metadata: string | null |
     try { repaired.push(await putToS3(key, bytes, contentType)); } catch (e) { errors.push(`s3:${e instanceof Error ? e.message : "failed"}`); }
   }
   if (!providers.has("cloudinary") && cloudinaryConfigured()) {
-    try { repaired.push(await putToCloudinary(key, bytes, contentType); } catch (e) { errors.push(`cloudinary:${e instanceof Error ? e.message : "failed"}`); }
+    try { repaired.push(await putToCloudinary(key, bytes, contentType)); } catch (e) { errors.push(`cloudinary:${e instanceof Error ? e.message : "failed"}`); }
   }
   return { repaired, errors };
 }
