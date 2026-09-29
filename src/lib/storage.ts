@@ -32,7 +32,7 @@ function configureCloudinary() {
   return cloudinary;
 }
 
-function cloudinaryResourceType(contentType: string) {
+function cloudinaryResourceType(contentType: string): "image" | "raw" {
   return contentType.startsWith("image/") ? "image" : "raw";
 }
 
