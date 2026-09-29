@@ -43,6 +43,18 @@ export async function destroySession() {
   jar.delete("medai_session");
 }
 
+export async function requireUser() {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("UNAUTHENTICATED");
+  return user;
+}
+
+export async function requireRole(roles: string[]) {
+  const user = await requireUser();
+  if (!roles.includes(user.role)) throw new Error("FORBIDDEN");
+  return user;
+}
+
 export async function getCurrentUser() {
   const jar = await cookies();
   const token = jar.get("medai_session")?.value;
