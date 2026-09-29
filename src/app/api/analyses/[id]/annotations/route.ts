@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { getAnalysisForUser, requireReviewer } from "@/lib/clinical-review";
+import { audit } from "@/lib/audit";
+export async function POST(req: Request,{params}:{params:Promise<{id:string}>}){try{const user=await requireReviewer();const {id}=await params;const analysis=await getAnalysisForUser(id);if(!analysis)return NextResponse.json({error:"Analysis not found"},{status:404});const body=await req.json();const text=String(body.text||"").trim();if(!text)return NextResponse.json({error:"Annotation text is required"},{status:400});const annotation=await db.analysisAnnotation.create({data:{analysisId:id,authorId:user.id,text}});await audit("CLINICIAN_ANNOTATION_ADDED","ANALYSIS",id,JSON.stringify({annotationId:annotation.id}),user.id);return NextResponse.json({annotation});}catch(e){const m=e instanceof Error?e.message:"ANNOTATION_FAILED";return NextResponse.json({error:m},{status:m==="UNAUTHENTICATED"?401:m==="FORBIDDEN"||m==="REVIEWER_ROLE_REQUIRED"?403:500});}}
