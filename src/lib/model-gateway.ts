@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { getPrivateObject } from "@/lib/storage";
+import { bodyToBytes, getPrivateObject } from "@/lib/storage";
 import { runOpenAIImageAssessment } from "@/lib/openai-model";
 
 const responseSchema = z.object({
@@ -18,7 +18,7 @@ export async function runModelInference(analysisId: string) {
 
   const object = await getPrivateObject(analysis.asset.storageKey, analysis.asset.metadata);
   if (!object.Body) throw new Error("SOURCE_ASSET_NOT_FOUND");
-  const bytes = await object.Body.transformToByteArray();
+  const bytes = await bodyToBytes(object.Body);
   const requestHash = crypto.createHash("sha256").update(bytes).digest("hex");
   const startedAt = new Date();
   const run = await db.inferenceRun.create({ data: { analysisId, modelId: analysis.model.id, status: "RUNNING", requestHash, startedAt } });
