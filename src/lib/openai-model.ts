@@ -23,7 +23,7 @@ export async function runOpenAIImageAssessment(args: {
   if (!apiKey) throw new Error("OPENAI_API_KEY_NOT_CONFIGURED");
   const model = process.env.OPENAI_MODEL || args.configuredModel;
   const version = process.env.OPENAI_MODEL_VERSION || args.configuredVersion || model;
-  const dataUrl = `data:${args.mimeType};base64,${Buffer.from(bytes).toString("base64")}`;
+  const dataUrl = `data:${args.mimeType};base64,${Buffer.from(args.bytes).toString("base64")}`;
   const prompt = `You are an AI clinical decision-support component inside MedAI. Analyze the supplied ${args.modality} image only as an AI support assessment. Do not claim a definitive diagnosis. Return JSON only with this shape: {"status":"COMPLETED"|"NEEDS_REVIEW","model":{"name":"${model}","version":"${version}"},"findings":[{"label":"...","confidence":0.0,"location":{"x":0,"y":0}}],"limitations":["..."]}. Include uncertainty and limitations. Every result must remain subject to qualified clinician review and sign-off. If the image is unsuitable, say so in limitations and use NEEDS_REVIEW.`;
 
   const response = await fetch("https://api.openai.com/v1/responses", {
