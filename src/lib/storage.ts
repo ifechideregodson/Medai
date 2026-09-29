@@ -1,4 +1,5 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import type { ServerSideEncryption } from "@aws-sdk/client-s3";
 import { v2 as cloudinary } from "cloudinary";
 
 const bucket = process.env.S3_BUCKET;
@@ -46,7 +47,7 @@ export type StorageLocation = {
 };
 
 export async function putToS3(key: string, body: Uint8Array, contentType: string) {
-  await s3Client().send(new PutObjectCommand({ Bucket: bucket!, Key: key, Body: body, ContentType: contentType, ServerSideEncryption: process.env.S3_SERVER_SIDE_ENCRYPTION || undefined }));
+  await s3Client().send(new PutObjectCommand({ Bucket: bucket!, Key: key, Body: body, ContentType: contentType, ServerSideEncryption: process.env.S3_SERVER_SIDE_ENCRYPTION as ServerSideEncryption | undefined }));
   return { provider: "s3" as const, key };
 }
 
