@@ -1,0 +1,4 @@
+import { db } from "@/lib/db";
+import { requireUser } from "@/lib/auth";
+export async function recordConsent(patientId:string, organizationId:string, purpose:string, status:"GRANTED"|"REVOKED"){const user=await requireUser();return db.consent.create({data:{patientId,organizationId,purpose,status,grantedAt:status==="GRANTED"?new Date():null,revokedAt:status==="REVOKED"?new Date():null,recordedById:user.id}})}
+export async function canUsePatientData(patientId:string, organizationId:string, purpose:string){return Boolean(await db.consent.findFirst({where:{patientId,organizationId,purpose,status:"GRANTED",revokedAt:null}}))}
