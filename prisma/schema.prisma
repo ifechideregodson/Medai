@@ -1,0 +1,356 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  HOSPITAL_ADMIN
+  DOCTOR
+  RADIOLOGIST
+  DERMATOLOGIST
+  RESEARCHER
+  NURSE
+  LAB_SCIENTIST
+  PATIENT
+  MODEL_ADMIN
+}
+
+enum EncounterStatus {
+  OPEN
+  CLOSED
+}
+
+enum AnalysisStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  NEEDS_REVIEW
+  FAILED
+}
+
+enum AssetType {
+  XRAY
+  SKIN_IMAGE
+  LAB_FILE
+  RESEARCH_PAPER
+  DATASET
+  OTHER
+}
+
+model Organization {
+  id String @id @default(cuid())
+  name String
+  type String @default("HOSPITAL")
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memberships Membership[]
+  patients Patient[]
+  imagingStudies ImagingStudy[]
+  consents Consent[]
+  reports ClinicalReport[]
+  assets Asset[]
+  analyses Analysis[]
+}
+
+model Membership {
+  id String @id @default(cuid())
+  userId String
+  organizationId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  createdAt DateTime @default(now())
+  @@unique([userId,organizationId])
+}
+
+model Consent {
+  id String @id @default(cuid())
+  patientId String
+  organizationId String
+  purpose String
+  status String @default("PENDING")
+  grantedAt DateTime?
+  revokedAt DateTime?
+  recordedById String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  patient Patient @relation(fields:[patientId],references:[id],onDelete:Cascade)
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+}
+
+model ClinicalReport {
+  id String @id @default(cuid())
+  patientId String
+  organizationId String
+  authorId String
+  reviewerId String?
+  analysisId String? @unique
+  title String
+  body String
+  status String @default("DRAFT")
+  signedAt DateTime?
+  signedById String?
+  modelNameSnapshot String?
+  modelVersionSnapshot String?
+  findingsSnapshot String?
+  limitationsSnapshot String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  patient Patient @relation(fields:[patientId],references:[id],onDelete:Cascade)
+  author User @relation("ReportAuthor", fields:[authorId],references:[id],onDelete:Restrict)
+  reviewer User? @relation("ReportReviewer", fields:[reviewerId],references:[id],onDelete:SetNull)
+  signedBy User? @relation("ReportSigner", fields:[signedById],references:[id],onDelete:SetNull)
+  analysis Analysis? @relation(fields:[analysisId],references:[id],onDelete:SetNull)
+}
+
+model ModelRegistry {
+  id String @id @default(cuid())
+  name String
+  version String
+  modality String
+  intendedUse String
+  validationInfo String?
+  status String @default("TESTING")
+  endpoint String?
+  provider String @default("CUSTOM")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  analyses Analysis[]
+  inferenceRuns InferenceRun[]
+}
+
+model InferenceRun {
+  id          String   @id @default(cuid())
+  analysisId  String
+  modelId     String
+  status      String
+  requestHash String
+  rawResponse String?
+  errorMessage String?
+  startedAt   DateTime
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  analysis    Analysis @relation(fields:[analysisId], references:[id], onDelete:Cascade)
+  model       ModelRegistry @relation(fields:[modelId], references:[id], onDelete:Restrict)
+  @@index([analysisId, createdAt])
+}
+
+model ResearchJob {
+  id String @id @default(cuid())
+  projectId String?
+  type String
+  status String @default("QUEUED")
+  inputKey String?
+  outputKey String?
+  parameters String?
+  error String?
+  createdAt DateTime @default(now())
+  startedAt DateTime?
+  finishedAt DateTime?
+}
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  name          String
+  role          Role
+  passwordHash  String
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  patients      Patient[]   @relation("PatientOwner")
+  memberships   Membership[]
+  reports       ClinicalReport[] @relation("ReportAuthor")
+  reviewedReports ClinicalReport[] @relation("ReportReviewer")
+  signedReports ClinicalReport[] @relation("ReportSigner")
+  annotations AnalysisAnnotation[]
+  auditLogs     AuditLog[]
+  analyses      Analysis[]
+  consents      Consent[]
+  sessions      Session[]
+  systemSettings SystemSetting[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash    String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
+
+model Patient {
+  id            String      @id @default(cuid())
+  medicalId     String      @unique
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime?
+  sex           String?
+  phone         String?
+  allergies     String?
+  history       String?
+  ownerId       String?
+  organizationId String?
+  owner         User?       @relation("PatientOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  organization Organization? @relation(fields:[organizationId],references:[id],onDelete:SetNull)
+  encounters    Encounter[]
+  assets        Asset[]
+  imagingStudies ImagingStudy[]
+  analyses      Analysis[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Encounter {
+  id          String          @id @default(cuid())
+  patientId   String
+  patient     Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  clinicianId String?
+  status      EncounterStatus @default(OPEN)
+  symptoms    String?
+  vitals      String?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ImagingStudy {
+  id              String   @id @default(cuid())
+  organizationId  String
+  patientId       String
+  studyInstanceUid String? @unique
+  accessionNumber String?
+  studyDate       DateTime?
+  description     String?
+  modality        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  organization    Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  patient         Patient @relation(fields:[patientId],references:[id],onDelete:Cascade)
+  series          ImagingSeries[]
+  assets          Asset[]
+}
+
+model ImagingSeries {
+  id              String   @id @default(cuid())
+  studyId         String
+  seriesInstanceUid String? @unique
+  seriesNumber    Int?
+  modality        String?
+  description     String?
+  bodyPart        String?
+  createdAt       DateTime @default(now())
+  study           ImagingStudy @relation(fields:[studyId],references:[id],onDelete:Cascade)
+  assets          Asset[]
+}
+
+model Asset {
+  id          String    @id @default(cuid())
+  organizationId String?
+  patientId   String?
+  patient     Patient?  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  name        String
+  type        AssetType
+  mimeType    String?
+  storageKey  String?
+  metadata    String?
+  createdAt   DateTime  @default(now())
+  analyses    Analysis[]
+  studyId     String?
+  seriesId    String?
+  study       ImagingStudy? @relation(fields:[studyId],references:[id],onDelete:SetNull)
+  series      ImagingSeries? @relation(fields:[seriesId],references:[id],onDelete:SetNull)
+}
+
+model Analysis {
+  id              String         @id @default(cuid())
+  organizationId  String?
+  patientId       String?
+  patient         Patient?       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  assetId         String?
+  asset           Asset?         @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  requestedById   String?
+  requestedBy     User?          @relation(fields: [requestedById], references: [id], onDelete: SetNull)
+  modelId         String?
+  model           ModelRegistry? @relation(fields:[modelId],references:[id],onDelete:SetNull)
+  kind            String
+  modelName       String
+  modelVersion    String
+  status          AnalysisStatus @default(QUEUED)
+  findings        String?
+  limitations     String?
+  clinicianReview String?
+  reviewedAt      DateTime?
+  reviewedById    String?
+  reviewStatus    String         @default("PENDING")
+  reviewDecision  String?
+  report          ClinicalReport?
+  annotations     AnalysisAnnotation[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model AnalysisAnnotation {
+  id         String   @id @default(cuid())
+  analysisId String
+  authorId   String
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  analysis   Analysis @relation(fields:[analysisId], references:[id], onDelete:Cascade)
+  author     User @relation(fields:[authorId], references:[id], onDelete:Restrict)
+  @@index([analysisId, createdAt])
+}
+
+model ResearchProject {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ResearchDocument {
+  id          String   @id @default(cuid())
+  projectId   String?
+  title       String
+  source      String?
+  citation    String?
+  storageKey  String?
+  abstract    String?
+  createdAt   DateTime @default(now())
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedBy   User?    @relation(fields:[updatedById], references:[id], onDelete:SetNull)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  previousHash String?
+  eventHash String?
+  createdAt DateTime @default(now())
+  @@index([entity, entityId, createdAt])
+}
