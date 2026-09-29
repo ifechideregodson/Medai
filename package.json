@@ -18,6 +18,9 @@
     "@aws-sdk/client-s3": "^3.888.0",
     "@prisma/client": "^6.16.2",
     "@tailwindcss/postcss": "^4.1.13",
+    "@types/node": "20.17.6",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "dcmjs": "^0.43.0",
@@ -26,15 +29,12 @@
     "next": "^15.5.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "typescript": "^5.9.2",
     "zod": "^4.1.8"
   },
   "devDependencies": {
-    "@types/node": "20.17.6",
-    "@types/react": "19.1.13",
-    "@types/react-dom": "19.1.9",
     "prisma": "^6.16.2",
     "tailwindcss": "^4.1.13",
-    "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
+    "tsx": "^4.20.5"
   }
 }
