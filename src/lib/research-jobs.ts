@@ -1,0 +1,3 @@
+import { db } from "@/lib/db";
+import { requireRole } from "@/lib/auth";
+export async function createResearchJob(data:{projectId?:string;type:string;inputKey?:string;parameters?:unknown}){await requireRole(["RESEARCHER","SUPER_ADMIN","MODEL_ADMIN"]);return db.researchJob.create({data:{projectId:data.projectId,type:data.type,inputKey:data.inputKey,parameters:data.parameters?JSON.stringify(data.parameters):null}})}
