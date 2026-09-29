@@ -34,7 +34,8 @@ export async function runModelInference(analysisId: string) {
     } else {
       if (!analysis.model.endpoint) throw new Error("MODEL_ENDPOINT_NOT_CONFIGURED");
       const form = new FormData();
-      form.append("file", new Blob([bytes], { type: analysis.asset.mimeType || "application/octet-stream" }), analysis.asset.name);
+      const uploadBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+      form.append("file", new Blob([uploadBuffer], { type: analysis.asset.mimeType || "application/octet-stream" }), analysis.asset.name);
       form.append("model_name", analysis.model.name);
       form.append("model_version", analysis.model.version);
       form.append("request_hash", requestHash);
