@@ -36,7 +36,7 @@ function cloudinaryResourceType(contentType: string) {
 }
 
 function cloudinaryPublicId(key: string) {
-  return `medai/${key.replace(/^\/+/, "").replace(/\.[^/.]+$/, "")}`;
+  return `medai/${key.replace(/^\\/+/, "").replace(/\\.[^/.]+$/, "")}`;
 }
 
 export type StorageLocation = {
@@ -124,13 +124,17 @@ export async function getPrivateObject(key: string, metadata?: string | null) {
   }
 }
 
+async function bodyToBytes(body: NonNullable<Awaited<ReturnType<typeof getPrivateObject>>["Body"]>) {
+  return body instanceof Uint8Array ? body : await body.transformToByteArray();
+}
+
 export async function repairPrivateObject(key: string, metadata: string | null | undefined, contentType: string) {
   const parsed = metadata ? (() => { try { return JSON.parse(metadata); } catch { return null; } })() : null;
   const locations: StorageLocation[] = parsed?.storage?.locations || [];
   const providers = new Set(locations.map((l: StorageLocation) => l.provider));
   const source = providers.has("s3") || providers.has("cloudinary") ? await getPrivateObject(key, metadata) : null;
   if (!source?.Body) throw new Error("NO_STORAGE_COPY_AVAILABLE");
-  const bytes = await source.Body.transformToByteArray();
+  const bytes = await bodyToBytes(source.Body);
   const repaired: StorageLocation[] = [];
   const errors: string[] = [];
   if (!providers.has("s3") && bucket && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY) {
