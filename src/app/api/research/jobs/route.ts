@@ -1,0 +1,1 @@
+import {NextRequest,NextResponse} from "next/server"; import {createResearchJob} from "@/lib/research-jobs"; export async function POST(req:NextRequest){try{return NextResponse.json(await createResearchJob(await req.json()),{status:201})}catch(e:any){return NextResponse.json({error:e?.message||"REQUEST_FAILED"},{status:400})}}
