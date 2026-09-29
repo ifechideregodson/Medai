@@ -1,0 +1,10 @@
+import Link from "next/link";
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+
+export default async function ImagingPage() {
+  const user = await getCurrentUser();
+  const orgs = user && user.role !== "SUPER_ADMIN" ? (await db.membership.findMany({ where:{userId:user.id}, select:{organizationId:true} })).map(x=>x.organizationId) : undefined;
+  const analyses = user ? await db.analysis.findMany({ where: { kind: "XRAY", ...(orgs ? {organizationId:{in:orgs}} : {}) }, orderBy: { createdAt: "desc" }, take: 50, include: { patient: true, asset: true } }) : [];
+  return <main className="mx-auto max-w-7xl px-6 py-10"><h1 className="text-3xl font-bold">Imaging Workspace</h1><p className="mt-2 text-slate-600">Secure imaging cases, model analysis records and clinician review.</p><div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900">Clinical model outputs remain gated. A configured validated model is required before the platform can record model findings.</div><Link href="/imaging/new" className="btn mt-5 inline-block bg-slate-900 text-white">Upload imaging asset</Link><div className="card mt-6 overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b"><th className="p-3">Case</th><th className="p-3">Patient</th><th className="p-3">Model</th><th className="p-3">Status</th><th className="p-3">Review</th></tr></thead><tbody>{analyses.map(a=><tr key={a.id} className="border-b"><td className="p-3"><Link className="font-semibold underline" href={`/imaging/${a.id}`}>{a.asset?.name ?? "Imaging case"}</Link></td><td className="p-3">{a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : "Unassigned"}</td><td className="p-3">{a.modelName} {a.modelVersion}</td><td className="p-3">{a.status}</td><td className="p-3">{a.reviewStatus}</td></tr>)}</tbody></table>{analyses.length===0&&<p className="p-6 text-sm text-slate-500">No imaging cases are recorded yet.</p>}</div></main>;
+}
