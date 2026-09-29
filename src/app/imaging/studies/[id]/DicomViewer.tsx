@@ -39,7 +39,8 @@ export default function DicomViewer({ assetId, name }: Props) {
 
         const bytes = new Uint8Array(await response.arrayBuffer());
         const dcmjs = await import("dcmjs");
-        const dataSet = dcmjs.data.DicomMessage.readFile(bytes.buffer);
+        const dcmBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+        const dataSet = dcmjs.data.DicomMessage.readFile(dcmBuffer);
         const natural = dcmjs.data.DicomMetaDictionary.namifyDataset(dataSet.dict) as Record<string, any>;
         const rows = Number(natural.Rows); const columns = Number(natural.Columns);
         if (!rows || !columns) throw new Error("DICOM pixel dimensions are missing.");
