@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { requireOrganizationMember, getPatientInOrganization } from "@/lib/access";
 import { putPrivateObject } from "@/lib/storage";
 import { extractDicomMetadata } from "@/lib/dicom";
+import { audit } from "@/lib/audit";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const allowed = new Set(["image/jpeg", "image/png", "application/pdf", "application/dicom", "application/octet-stream"]);
@@ -46,7 +47,20 @@ export async function POST(req: Request) {
       if (dicom.seriesInstanceUid) { const series = await db.imagingSeries.upsert({ where: { seriesInstanceUid: dicom.seriesInstanceUid }, update: { studyId: study.id, seriesNumber: dicom.seriesNumber, modality: dicom.modality, description: dicom.seriesDescription, bodyPart: dicom.bodyPart }, create: { studyId: study.id, seriesInstanceUid: dicom.seriesInstanceUid, seriesNumber: dicom.seriesNumber, modality: dicom.modality, description: dicom.seriesDescription, bodyPart: dicom.bodyPart } }); seriesId = series.id; }
     }
     const asset = await db.asset.create({ data: { id, organizationId, patientId, studyId, seriesId, name: file.name, type, mimeType: file.type || null, storageKey: key, metadata: JSON.stringify({ size: file.size, uploadedById: user.id, dicom, storage: { key, primary: storage.primary.provider, locations: storage.locations, cloudinary: storage.locations.find((location) => location.provider === "cloudinary")?.cloudinary || null } }) } });
-    await db.auditLog.create({ data: { userId: user.id, action: "ASSET_UPLOAD", entity: "Asset", entityId: asset.id, details: JSON.stringify({ organizationId, patientId, type, size: file.size, storagePrimary: storage.primary.provider, storageProviders: storage.locations.map((location) => location.provider) }) } });
+    await audit(
+      "ASSET_UPLOAD",
+      "ASSET",
+      asset.id,
+      JSON.stringify({
+        organizationId,
+        patientId,
+        type,
+        size: file.size,
+        storagePrimary: storage.primary.provider,
+        storageProviders: storage.locations.map((location) => location.provider)
+      }),
+      user.id
+    );
     return NextResponse.json({ asset: { id: asset.id, name: asset.name, type: asset.type, mimeType: asset.mimeType, createdAt: asset.createdAt }, storage: { mode: "REDUNDANT_PRIVATE", primary: storage.primary.provider, providers: storage.locations.map((location) => location.provider) } }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "UPLOAD_FAILED";
