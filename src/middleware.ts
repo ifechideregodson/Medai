@@ -5,6 +5,7 @@ export function middleware(request: NextRequest) {
   const publicPath =
     path === "/login" ||
     path === "/setup" ||
+    path.startsWith("/setup/") ||
     path.startsWith("/_next") ||
     path === "/favicon.ico" ||
     path === "/api/setup/first-admin";
