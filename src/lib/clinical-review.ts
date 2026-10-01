@@ -20,7 +20,10 @@ export async function getAnalysisForUser(id: string) {
   if (!analysis) return null;
   if (user.role === "SUPER_ADMIN") return analysis;
   if (!analysis.organizationId) throw new Error("FORBIDDEN");
-  const membership = await db.membership.findUnique({ where: { userId_organizationId: { userId: user.id, organizationId: analysis.organizationId } } });
-  if (!membership) throw new Error("FORBIDDEN");
+  const membership = await db.membership.findUnique({
+    where: { userId_organizationId: { userId: user.id, organizationId: analysis.organizationId } },
+    include: { organization: true }
+  });
+  if (!membership || !membership.organization.active) throw new Error("FORBIDDEN");
   return analysis;
 }
