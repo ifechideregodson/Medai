@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import PrintButton from "../PrintButton";
 
 export default async function ReportDetail({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
@@ -20,7 +21,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   return <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 print:max-w-none print:px-0">
     <div className="mb-5 flex flex-wrap items-center justify-between gap-3 print:hidden">
       <Link href="/reports" className="text-sm font-semibold text-slate-600 hover:text-red-700">← Reports workspace</Link>
-      <button onClick={() => {}} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700" type="button">Use browser print</button>
+      <PrintButton />
     </div>
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
       <header className="border-b-4 border-red-700 px-6 py-6 sm:px-10">
