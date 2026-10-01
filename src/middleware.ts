@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { appUrl } from "@/lib/app-url";
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -13,7 +14,7 @@ export function middleware(request: NextRequest) {
   if (publicPath) return NextResponse.next();
 
   const hasSession = Boolean(request.cookies.get("medai_session")?.value);
-  if (!hasSession) return NextResponse.redirect(new URL("/login", request.url));
+  if (!hasSession) return NextResponse.redirect(appUrl("/login"));
   return NextResponse.next();
 }
 
