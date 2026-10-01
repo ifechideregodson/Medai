@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import type { Route } from "next";
 import { revalidatePath } from "next/cache";
 import { Role } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -99,7 +100,7 @@ export default async function OrganizationPage({ searchParams }: { searchParams:
     </section>
 
     <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      {[["Patients", patients, "/patients"], ["Imaging studies", studies, "/imaging"], ["AI analyses", analyses, "/imaging"], ["Reports", reports, "/reports"], ["Pending review", pendingReviews, "/imaging"]].map(([label, value, href]) => <Link key={String(label)} href={String(href)} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-red-200 hover:shadow-md"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-bold text-slate-950">{value}</p><p className="mt-1 text-xs text-red-700">Open workspace →</p></Link>)}
+      {([["Patients", patients, "/patients"], ["Imaging studies", studies, "/imaging"], ["AI analyses", analyses, "/imaging"], ["Reports", reports, "/reports"], ["Pending review", pendingReviews, "/imaging"]] as const).map(([label, value, href]) => <Link key={label} href={href as Route} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-red-200 hover:shadow-md"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-bold text-slate-950">{value}</p><p className="mt-1 text-xs text-red-700">Open workspace →</p></Link>)}
     </section>
 
     {user.role === "HOSPITAL_ADMIN" && <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
