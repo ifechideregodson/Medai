@@ -26,14 +26,7 @@ export async function createSession(userId: string) {
   const token = crypto.randomBytes(48).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 86400000);
   await db.session.create({ data: { userId, tokenHash: hashToken(token), expiresAt } });
-  const jar = await cookies();
-  jar.set("medai_session", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    expires: expiresAt
-  });
+  return { token, expiresAt };
 }
 
 export async function destroySession() {
