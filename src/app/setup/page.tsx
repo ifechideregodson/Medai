@@ -60,70 +60,70 @@ export default function FirstAdminSetupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
+    <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
       <div className="mx-auto max-w-md">
-        <div className="rounded-2xl border border-red-100 bg-white p-6 shadow-xl shadow-slate-200/60">
+        <div className="rounded-2xl border border-cyan-500/20 bg-slate-900 p-6 shadow-2xl shadow-cyan-950/30">
           <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-wider text-red-700">MedAI Clinical Platform</p>
-            <h1 className="mt-2 text-2xl font-bold">Create super-admin</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">MedAI Clinical Platform</p>
+            <h1 className="mt-2 text-2xl font-bold text-white">Create super-admin</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
               This page is only for creating the first platform owner. You need the
               FIRST_ADMIN_SETUP_SECRET configured in Render.
             </p>
           </div>
 
           {message && (
-            <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+            <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-950/40 p-3 text-sm text-emerald-300">
               {message}
             </div>
           )}
           {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 rounded-lg border border-red-500/30 bg-red-950/40 p-3 text-sm text-red-300">
               {error}
             </div>
           )}
 
           <form onSubmit={submit} className="space-y-4">
             <label className="block">
-              <span className="mb-1 block text-sm font-medium">Setup secret</span>
+              <span className="mb-1 block text-sm font-medium text-slate-200">Setup secret</span>
               <input
                 type="password"
                 value={setupSecret}
                 onChange={(e) => setSetupSecret(e.target.value)}
                 autoComplete="off"
                 required
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 outline-none focus:border-red-600"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                 placeholder="FIRST_ADMIN_SETUP_SECRET"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium">Full name</span>
+              <span className="mb-1 block text-sm font-medium text-slate-200">Full name</span>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="name"
                 required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 outline-none focus:border-cyan-500"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                 placeholder="Platform administrator"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium">Admin email</span>
+              <span className="mb-1 block text-sm font-medium text-slate-200">Admin email</span>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 outline-none focus:border-cyan-500"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                 placeholder="admin@example.com"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium">Password</span>
+              <span className="mb-1 block text-sm font-medium text-slate-200">Password</span>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
@@ -131,13 +131,13 @@ export default function FirstAdminSetupPage() {
                 autoComplete="new-password"
                 minLength={12}
                 required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 outline-none focus:border-cyan-500"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                 placeholder="At least 12 characters"
               />
             </label>
 
             <label className="block">
-              <span className="mb-1 block text-sm font-medium">Confirm password</span>
+              <span className="mb-1 block text-sm font-medium text-slate-200">Confirm password</span>
               <input
                 type={showPassword ? "text" : "password"}
                 value={confirmPassword}
@@ -145,7 +145,7 @@ export default function FirstAdminSetupPage() {
                 autoComplete="new-password"
                 minLength={12}
                 required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 outline-none focus:border-cyan-500"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                 placeholder="Enter the password again"
               />
             </label>
@@ -155,6 +155,7 @@ export default function FirstAdminSetupPage() {
                 type="checkbox"
                 checked={showPassword}
                 onChange={(e) => setShowPassword(e.target.checked)}
+                className="accent-cyan-500"
               />
               Show password
             </label>
@@ -162,7 +163,7 @@ export default function FirstAdminSetupPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-lg bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-lg bg-cyan-600 px-4 py-3 font-semibold text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {busy ? "Creating administrator..." : "Create super-admin"}
             </button>
