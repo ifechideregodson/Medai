@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 export default async function SkinPage() {
   const user = await getCurrentUser();
   const organizationIds = user && user.role !== "SUPER_ADMIN"
     ? (await db.membership.findMany({ where: { userId: user.id, organization: { active: true } }, select: { organizationId: true } })).map(x => x.organizationId)
     : undefined;
-  let analyses: Awaited<ReturnType<typeof db.analysis.findMany>> = [];
+  let analyses: Prisma.AnalysisGetPayload<{ include: { patient: true } }>[] = [];
   if (user) {
     analyses = await db.analysis.findMany({ where: { kind: "SKIN", ...(organizationIds ? { organizationId: { in: organizationIds } } : {}) }, orderBy: { createdAt: "desc" }, take: 30, include: { patient: true } });
   }
