@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -31,7 +32,7 @@ export default async function Home() {
     { label: "AI cases", value: analyses, href: "/imaging", detail: "Recorded analyses" },
     { label: "Reports", value: reports, href: "/reports", detail: "Clinical reports" },
     { label: "Research", value: research, href: "/research", detail: "Research projects" },
-  ];
+  ] as const;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
@@ -60,7 +61,7 @@ export default async function Home() {
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <Link
-            href={card.href}
+            href={card.href as Route}
             key={card.label}
             className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-red-200 hover:shadow-md"
           >
