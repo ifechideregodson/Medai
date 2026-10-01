@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { audit } from "@/lib/audit";
 
 export default async function NewPatient() {
   const user = await getCurrentUser();
@@ -24,15 +25,15 @@ export default async function NewPatient() {
     if (!firstName || !lastName || !organizationId) return;
 
     if (current.role !== "SUPER_ADMIN") {
-      const membership = await db.membership.findUnique({ where: { userId_organizationId: { userId: current.id, organizationId } } });
-      if (!membership) return;
+      const membership = await db.membership.findUnique({ where: { userId_organizationId: { userId: current.id, organizationId } }, include: { organization: true } });
+      if (!membership || !membership.organization.active) return;
     } else {
       const organization = await db.organization.findFirst({ where: { id: organizationId, active: true } });
       if (!organization) return;
     }
 
     const medicalId = `MED-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
-    await db.patient.create({
+    const patient = await db.patient.create({
       data: {
         medicalId,
         firstName,
@@ -46,6 +47,7 @@ export default async function NewPatient() {
         ownerId: current.id,
       },
     });
+    await audit("PATIENT_CREATED", "PATIENT", patient.id, JSON.stringify({ organizationId }), current.id);
     redirect("/patients");
   }
 
