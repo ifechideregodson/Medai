@@ -6,9 +6,10 @@ export async function requireOrganizationMember(organizationId: string) {
   if (!user) throw new Error("UNAUTHENTICATED");
   if (user.role === "SUPER_ADMIN") return user;
   const membership = await db.membership.findUnique({
-    where: { userId_organizationId: { userId: user.id, organizationId } }
+    where: { userId_organizationId: { userId: user.id, organizationId } },
+    include: { organization: true }
   });
-  if (!membership) throw new Error("FORBIDDEN");
+  if (!membership || !membership.organization.active) throw new Error("FORBIDDEN");
   return user;
 }
 
