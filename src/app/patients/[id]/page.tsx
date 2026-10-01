@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -68,7 +69,7 @@ export default async function PatientWorkspace({ params }: { params: Promise<{ i
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-4"><h2 className="font-bold text-slate-900">Unified clinical timeline</h2><p className="mt-1 text-xs text-slate-500">Recorded events across visits, imaging, AI analyses, reports, assets and consent.</p></div>
         {timeline.length === 0 ? <div className="px-5 py-12 text-center text-sm text-slate-500">No clinical events have been recorded for this patient.</div> :
-        <div className="divide-y divide-slate-100">{timeline.map((item,i)=><div key={`${item.kind}-${item.at.toISOString()}-${i}`} className="flex gap-4 p-5"><div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-red-700"/><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-[11px] font-bold uppercase tracking-wider text-red-700">{item.kind}</span><time className="text-xs text-slate-400">{item.at.toLocaleString()}</time></div><div className="mt-1 font-semibold text-slate-900">{item.href ? <Link className="hover:text-red-700" href={item.href}>{item.title}</Link> : item.title}</div>{item.detail && <p className="mt-1 text-sm text-slate-600">{item.detail}</p>}</div></div>)}</div>}
+        <div className="divide-y divide-slate-100">{timeline.map((item,i)=><div key={`${item.kind}-${item.at.toISOString()}-${i}`} className="flex gap-4 p-5"><div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-red-700"/><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-[11px] font-bold uppercase tracking-wider text-red-700">{item.kind}</span><time className="text-xs text-slate-400">{item.at.toLocaleString()}</time></div><div className="mt-1 font-semibold text-slate-900">{item.href ? <Link className="hover:text-red-700" href={item.href as Route}>{item.title}</Link> : item.title}</div>{item.detail && <p className="mt-1 text-sm text-slate-600">{item.detail}</p>}</div></div>)}</div>}
       </section>
 
       <div className="space-y-6">
