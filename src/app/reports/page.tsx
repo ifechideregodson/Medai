@@ -16,7 +16,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   const organizationIds = user.role === "SUPER_ADMIN"
     ? undefined
-    : (await db.membership.findMany({ where: { userId: user.id }, select: { organizationId: true } })).map(x => x.organizationId);
+    : (await db.membership.findMany({ where: { userId: user.id, organization: { active: true } }, select: { organizationId: true } })).map(x => x.organizationId);
 
   const reports = await db.clinicalReport.findMany({
     where: {
