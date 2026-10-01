@@ -16,7 +16,7 @@ services:
           name: medai-postgres
           property: connectionString
       - key: APP_URL
-        sync: false
+        value: https://medai-clinical-platform.onrender.com
       - key: FIRST_ADMIN_SETUP_SECRET
         generateValue: true
       - key: S3_REGION
