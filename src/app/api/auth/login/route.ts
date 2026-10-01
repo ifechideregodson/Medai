@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticate, createSession } from "@/lib/auth";
+import { appUrl } from "@/lib/app-url";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -8,7 +9,7 @@ export async function POST(request: NextRequest) {
   const user = await authenticate(email, password);
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login?error=invalid", request.url), 303);
+    return NextResponse.redirect(appUrl("/login?error=invalid"), 303);
   }
 
   const { token, expiresAt } = await createSession(user.id);
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
         ? "/organization"
         : "/";
 
-  const response = NextResponse.redirect(new URL(destination, request.url), 303);
+  const response = NextResponse.redirect(appUrl(destination), 303);
   response.cookies.set("medai_session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
