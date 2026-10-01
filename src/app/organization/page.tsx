@@ -8,6 +8,13 @@ import { audit } from "@/lib/audit";
 import { getUserOrganizations, requireOrganizationAdmin } from "@/lib/access";
 
 async function getOrganizationId(userId: string, requested?: string) {
+  const user = await getCurrentUser();
+  if (user?.role === "SUPER_ADMIN") {
+    const org = requested
+      ? await db.organization.findFirst({ where: { id: requested, active: true } })
+      : await db.organization.findFirst({ where: { active: true }, orderBy: { createdAt: "asc" } });
+    return org?.id ?? null;
+  }
   const memberships = await getUserOrganizations(userId);
   if (!memberships.length) return null;
   if (requested && memberships.some(m => m.organizationId === requested)) return requested;
