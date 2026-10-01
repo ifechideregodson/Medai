@@ -60,25 +60,25 @@ export default function FirstAdminSetupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100">
+    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
       <div className="mx-auto max-w-md">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+        <div className="rounded-2xl border border-red-100 bg-white p-6 shadow-xl shadow-slate-200/60">
           <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">MedAI Clinical Platform</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-red-700">MedAI Clinical Platform</p>
             <h1 className="mt-2 text-2xl font-bold">Create super-admin</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
+            <p className="mt-2 text-sm leading-6 text-slate-500">
               This page is only for creating the first platform owner. You need the
               FIRST_ADMIN_SETUP_SECRET configured in Render.
             </p>
           </div>
 
           {message && (
-            <div className="mb-4 rounded-lg border border-emerald-700 bg-emerald-950/40 p-3 text-sm text-emerald-300">
+            <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
               {message}
             </div>
           )}
           {error && (
-            <div className="mb-4 rounded-lg border border-red-700 bg-red-950/40 p-3 text-sm text-red-300">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {error}
             </div>
           )}
@@ -92,7 +92,7 @@ export default function FirstAdminSetupPage() {
                 onChange={(e) => setSetupSecret(e.target.value)}
                 autoComplete="off"
                 required
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 outline-none focus:border-cyan-500"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 outline-none focus:border-red-600"
                 placeholder="FIRST_ADMIN_SETUP_SECRET"
               />
             </label>
@@ -162,7 +162,7 @@ export default function FirstAdminSetupPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-lg bg-cyan-500 px-4 py-3 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-lg bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {busy ? "Creating administrator..." : "Create super-admin"}
             </button>
