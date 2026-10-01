@@ -8,7 +8,8 @@ export function middleware(request: NextRequest) {
     path.startsWith("/setup/") ||
     path.startsWith("/_next") ||
     path === "/favicon.ico" ||
-    path === "/api/setup/first-admin";
+    path === "/api/setup/first-admin" ||
+    path === "/api/auth/login";
   if (publicPath) return NextResponse.next();
 
   const hasSession = Boolean(request.cookies.get("medai_session")?.value);
