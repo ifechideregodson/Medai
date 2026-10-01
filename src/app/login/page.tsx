@@ -9,6 +9,8 @@ export default function LoginPage() {
     const user = await authenticate(email, password);
     if (!user) redirect("/login?error=invalid");
     await createSession(user.id);
+    if (user.role === "SUPER_ADMIN") redirect("/admin");
+    if (user.role === "HOSPITAL_ADMIN") redirect("/organization");
     redirect("/");
   }
 
