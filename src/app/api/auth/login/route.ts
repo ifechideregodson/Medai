@@ -3,7 +3,7 @@ import { authenticate, createSession } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
-  const email = String(formData.get("email") || "");
+  const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
   const user = await authenticate(email, password);
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=invalid", request.url), 303);
   }
 
-  await createSession(user.id);
+  const { token, expiresAt } = await createSession(user.id);
 
   const destination =
     user.role === "SUPER_ADMIN"
@@ -20,5 +20,13 @@ export async function POST(request: NextRequest) {
         ? "/organization"
         : "/";
 
-  return NextResponse.redirect(new URL(destination, request.url), 303);
+  const response = NextResponse.redirect(new URL(destination, request.url), 303);
+  response.cookies.set("medai_session", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: expiresAt
+  });
+  return response;
 }
