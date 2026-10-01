@@ -12,7 +12,7 @@ export default async function PatientWorkspace({ params }: { params: Promise<{ i
   const { id } = await params;
   const orgIds = user.role === "SUPER_ADMIN"
     ? undefined
-    : (await db.membership.findMany({ where: { userId: user.id }, select: { organizationId: true } })).map(x => x.organizationId);
+    : (await db.membership.findMany({ where: { userId: user.id, organization: { active: true } }, select: { organizationId: true } })).map(x => x.organizationId);
 
   const patient = await db.patient.findFirst({
     where: { id, ...(orgIds ? { organizationId: { in: orgIds } } : {}) },
