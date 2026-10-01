@@ -8,7 +8,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   const user = await getCurrentUser();
   if (!user) return null;
   const { id } = await params;
-  const orgIds = user.role === "SUPER_ADMIN" ? undefined : (await db.membership.findMany({ where: { userId: user.id }, select: { organizationId: true } })).map(x => x.organizationId);
+  const orgIds = user.role === "SUPER_ADMIN" ? undefined : (await db.membership.findMany({ where: { userId: user.id, organization: { active: true } }, select: { organizationId: true } })).map(x => x.organizationId);
   const report = await db.clinicalReport.findFirst({
     where: { id, ...(orgIds ? { organizationId: { in: orgIds } } : {}) },
     include: { patient: true, author: true, reviewer: true, signedBy: true, analysis: { include: { inferenceRuns: { orderBy: { createdAt: "desc" }, take: 10 } } } },
