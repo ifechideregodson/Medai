@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { bodyToBytes, getPrivateObject } from "@/lib/storage";
 import { runOpenAIImageAssessment } from "@/lib/openai-model";
+import { enforceClinicianReview } from "@/lib/model-gateway-safety";
 
 const responseSchema = z.object({
   status: z.enum(["COMPLETED", "NEEDS_REVIEW"]),
@@ -186,10 +187,8 @@ export async function runModelInference(analysisId: string) {
         throw new Error("MODEL_IDENTITY_MISMATCH");
       }
 
-      // External analyzer output is research-only until a separate clinical
-      // validation and governance process explicitly authorizes otherwise.
-      // Never let a remote response promote an analyzer result to COMPLETED.
-      parsed.status = "NEEDS_REVIEW";
+      // External analyzer output is research-only until separately validated.
+      parsed = enforceClinicianReview(parsed);
     }
 
     const limitations = parsed.limitations.length
