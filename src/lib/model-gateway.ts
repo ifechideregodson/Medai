@@ -185,6 +185,11 @@ export async function runModelInference(analysisId: string) {
       ) {
         throw new Error("MODEL_IDENTITY_MISMATCH");
       }
+
+      // External analyzer output is research-only until a separate clinical
+      // validation and governance process explicitly authorizes otherwise.
+      // Never let a remote response promote an analyzer result to COMPLETED.
+      parsed.status = "NEEDS_REVIEW";
     }
 
     const limitations = parsed.limitations.length
