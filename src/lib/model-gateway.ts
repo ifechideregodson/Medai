@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { bodyToBytes, getPrivateObject } from "@/lib/storage";
 import { runOpenAIImageAssessment } from "@/lib/openai-model";
+import { enforceClinicianReview } from "@/lib/model-gateway-safety";
 
 const responseSchema = z.object({
   status: z.enum(["COMPLETED", "NEEDS_REVIEW"]),
@@ -123,6 +124,9 @@ export async function runModelInference(analysisId: string) {
       if (!analysis.model.endpoint) {
         throw new Error("MODEL_ENDPOINT_NOT_CONFIGURED");
       }
+      if (analysis.asset.mimeType.toLowerCase() === "image/dicom") {
+        throw new Error("MODEL_GATEWAY_UNSUPPORTED_IMAGE_TYPE");
+      }
 
       const form = new FormData();
       const uploadBuffer = bytes.buffer.slice(
@@ -141,12 +145,21 @@ export async function runModelInference(analysisId: string) {
       form.append("model_version", analysis.model.version);
       form.append("request_hash", requestHash);
 
-      const headers: Record<string, string> = {};
-      if (process.env.MODEL_GATEWAY_API_KEY) {
-        headers.authorization = `Bearer ${process.env.MODEL_GATEWAY_API_KEY}`;
+      const gatewayKey = process.env.MODEL_GATEWAY_API_KEY;
+      if (!gatewayKey) {
+        throw new Error("MODEL_GATEWAY_AUTH_NOT_CONFIGURED");
       }
 
-      const response = await fetch(analysis.model.endpoint, {
+      const endpoint = new URL(analysis.model.endpoint);
+      if (process.env.NODE_ENV === "production" && endpoint.protocol !== "https:") {
+        throw new Error("MODEL_GATEWAY_HTTPS_REQUIRED");
+      }
+
+      const headers: Record<string, string> = {
+        authorization: `Bearer ${gatewayKey}`
+      };
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers,
         body: form,
@@ -173,6 +186,9 @@ export async function runModelInference(analysisId: string) {
       ) {
         throw new Error("MODEL_IDENTITY_MISMATCH");
       }
+
+      // External analyzer output is research-only until separately validated.
+      parsed = enforceClinicianReview(parsed);
     }
 
     const limitations = parsed.limitations.length
