@@ -35,3 +35,10 @@ The `/admin` area is restricted to `SUPER_ADMIN` and now provides operational co
 S3 remains the preferred provider and Cloudinary is the protected secondary provider. New assets are dual-written when both providers are available. Reads fall back to Cloudinary when S3 retrieval fails. The owner dashboard includes a repair action to restore a missing provider copy from an available protected copy.
 
 Cloudinary credentials must remain server-side. Authenticated Cloudinary assets require signed delivery URLs; do not expose `CLOUDINARY_API_SECRET` to the browser.
+
+
+## External analyzer integration
+
+For an external analyzer registered in the model registry, configure its endpoint as the analyzer service's full `/api/v1/inference` URL. Configure `MODEL_GATEWAY_API_KEY` as a server-only secret matching the analyzer's `MEDAI_WEB_API_KEY`. Production requests require HTTPS.
+
+The model registry's version must match the analyzer artifact fingerprint exactly: `sha256:<64 lowercase hex characters>`. This binds inference to the precise model artifact rather than a mutable version label. The analyzer adapter returns `NEEDS_REVIEW` for research-only models; MedAI must preserve that status and the supplied limitations. Never activate a research-only artifact as clinically validated.
