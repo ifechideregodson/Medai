@@ -123,6 +123,9 @@ export async function runModelInference(analysisId: string) {
       if (!analysis.model.endpoint) {
         throw new Error("MODEL_ENDPOINT_NOT_CONFIGURED");
       }
+      if (analysis.asset.mimeType.toLowerCase() === "image/dicom") {
+        throw new Error("MODEL_GATEWAY_UNSUPPORTED_IMAGE_TYPE");
+      }
 
       const form = new FormData();
       const uploadBuffer = bytes.buffer.slice(
