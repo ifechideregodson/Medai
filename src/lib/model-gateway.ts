@@ -141,12 +141,21 @@ export async function runModelInference(analysisId: string) {
       form.append("model_version", analysis.model.version);
       form.append("request_hash", requestHash);
 
-      const headers: Record<string, string> = {};
-      if (process.env.MODEL_GATEWAY_API_KEY) {
-        headers.authorization = `Bearer ${process.env.MODEL_GATEWAY_API_KEY}`;
+      const gatewayKey = process.env.MODEL_GATEWAY_API_KEY;
+      if (!gatewayKey) {
+        throw new Error("MODEL_GATEWAY_AUTH_NOT_CONFIGURED");
       }
 
-      const response = await fetch(analysis.model.endpoint, {
+      const endpoint = new URL(analysis.model.endpoint);
+      if (process.env.NODE_ENV === "production" && endpoint.protocol !== "https:") {
+        throw new Error("MODEL_GATEWAY_HTTPS_REQUIRED");
+      }
+
+      const headers: Record<string, string> = {
+        authorization: `Bearer ${gatewayKey}`
+      };
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers,
         body: form,
